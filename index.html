@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html ng-app="stackathon" lang="en">
+
+<head>
+    <title>Dragoman. Your trip, booked.</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+    <script>
+    WebFont.load({
+        google: {
+            families: ["Open Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic", "Montserrat:400,700", "Raleway:regular,500,600,700"]
+        }
+    });
+    </script>
+    <link rel='stylesheet' type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <link href="stylesheets/styles.css" rel="stylesheet">
+</head>
+
+<body ng-controller="AppCtrl">
+    <div id="Home" class="w-section full-vh-section">
+        <div id='map-canvas'></div>
+        <md-sidenav id="leftStuff" style="background-color:#f39022;" ng-cloak class="ng-cloak md-sidenav-left md-whiteframe-4dp" md-component-id="left">
+            <md-toolbar style="background-color:#311b92;" class="md-theme-light">
+                <h1 layout-align="center" class="md-toolbar-tools" style="color: white;text-align: center;">{{name}}</h1>
+            </md-toolbar>
+            <md-content layout-align="center" style="background-color:#f39022;" ng-controller="LeftCtrl" layout-padding="">
+                <div style="text-align:center;">
+                    <span><img style="width:50px;" src="./images/address.png"/></span>
+                    <p style="text-align:center;padding:0;">{{address}}</p>
+                </div>
+                <hr style="padding:0;">
+                <div layout="row" layout-align="center">
+                    <div layout="column" style="padding-right:50px;">
+                        <span><img style="width:50px;color:white;" src="./images/man.png"/></span>
+                        <p style="text-align:center;padding:0;">40%</p>
+                    </div>
+                    <div layout="column">
+                        <span><img style="width:50px;color:white;" src="./images/woman.png"/></span>
+                        <p style="text-align:center;padding:0;">60%</p>
+                    </div>
+                </div>
+                <hr style="padding:0;">
+                <div style="text-align:center;">
+                    <span><img style="width:50px;" src="./images/age.png"/></span>
+                    <p style="text-align:center;padding:0;">18-24</p>
+                </div>
+                <hr style="padding:0;">
+                <div style="height: 305px">
+                    <uib-carousel active="active" interval="3000" no-wrap="false">
+                        <uib-slide ng-repeat="slide in slides track by slide.id" index="slide.id">
+                            <img ng-src="{{slide.image}}" style="margin:auto;">
+                            <div class="carousel-caption">
+                                <p>{{slide.text}}</p>
+                            </div>
+                        </uib-slide>
+                    </uib-carousel>
+                </div>
+    </div>
+    </md-content>
+    </md-sidenav>
+    </div>
+    <div id="spinner" data-delay="1000" class="w-dropdown bubble-out-menu">
+        <div class="w-dropdown-toggle bubble-out-toggle">
+            <div data-ix="menu-button" class="bubble-out-title" style="font-size:100px;">+</div>
+            <div data-ix="on-load-display-none" class="close" style="font-size:40px;">X</div>
+        </div>
+        <nav class="w-dropdown-list bubble-out-list">
+            <a href="#" id="clubButton" data-ix="bubble-out-top-right-4" class="w-dropdown-link link-1"><span><img src="./images/activity.png"/></span></a>
+            <a href="#" id="barButton" data-ix="bubble-out-top-right-3" class="w-dropdown-link link-1 _2"><span><img src="./images/food.png"/></span></a>
+            <a href="#" id="activityButton" data-ix="bubble-out-top-right-2" class="w-dropdown-link link-1 _3"><span><img src="./images/activity.png"/></span></a>
+            <!--             <a href="index.html#Extra" data-ix="bubble-out-top-right" class="w-dropdown-link link-1 _4"><span><img src="./images/saved.png"/></span></a> -->
+        </nav>
+    </div>
+    <div id="fsModal" class="modal modal-fullscreen">
+        <div class="modal-dialog">
+            <h2 style="text-align:center;color:#f39022;">Dragoman
+        </h2>
+            <div class="centered">
+                <img style="width:20vh;left:50%;" src="images/logo.png" /></div>
+            <hr style="padding:0;">
+            <div class="centered">
+                <h3>Select the location and duration of your trip.</h3>
+                <input placeholder="Country,city,etc.." style="margin-right:50px;"></input>
+                <input type="number" placeholder="5 days">
+                <br>
+                <br>
+                <button id="startTrip" class="btn btn-lg btn-primary">
+                    Plan Trip
+                </button>
+                <div>
+                </div>
+            </div>
+</body>
+<footer>
+    <script src='https://code.jquery.com/jquery-2.2.1.min.js'></script>
+    <script type="text/javascript" src="https://daks2k3a4ib2z.cloudfront.net/556a8456d607254261e9db33/js/webflow.d525243f4.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIfjYpqd9yztVKkqOo30gS710JbF6DTYo&sensor=true"></script>
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <!-- Angular Material Library -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/g/angular.bootstrap@1.2.2(ui-bootstrap.min.js+ui-bootstrap-tpls.min.js)"></script>
+    <script src="js/index.js"></script>
+</footer>
+
+</html>
