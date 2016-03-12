@@ -1,4 +1,6 @@
-
+.pac-container {
+        z-index: 10000000000000;
+    }
 #leftStuff{
     visibility: hidden;
 }

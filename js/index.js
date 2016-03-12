@@ -1,6 +1,6 @@
-var stackathon = angular.module('stackathon', ['ngMaterial', 'ui.bootstrap']);
+var stackathon = angular.module('stackathon', ['firebase', 'ngMaterial', 'ui.bootstrap']);
 
-stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $http) {
+stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $http, $firebaseArray) {
         $scope.toggleLeft = function(info) {
             $scope.name = info.data.name;
             $scope.address = info.data.vicinity;
@@ -63,40 +63,35 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
         // Create a map object, and include the MapTypeId to add
         // to the map type control.
         var mapOptions = {
-            zoom: 14,
+            // zoom: 14,
+            zoom: 3,
             center: new google.maps.LatLng(40.725189, -74.009999),
+            // center: new google.maps.LatLng(-33.8688, 151.2195),
             // center: {lat: -34.397, lng: 150.644},
             streetViewControl: false,
             zoomControl: false,
             mapTypeControl: false
         };
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+        var input = document.getElementById('locationInput');
 
-                infoWindow.setPosition(pos);
-                infoWindow.setContent('Location found.');
-                map.setCenter(pos);
-            }, function() {
-                handleLocationError(true, infoWindow, map.getCenter());
-            });
-        } else {
-            // Browser doesn't support Geolocation
-            handleLocationError(false, infoWindow, map.getCenter());
-        }
+        var autocomplete = new google.maps.places.Autocomplete(input);
 
-        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-            infoWindow.setPosition(pos);
-            infoWindow.setContent(browserHasGeolocation ?
-                'Error: The Geolocation service failed.' :
-                'Error: Your browser doesn\'t support geolocation.');
-        }
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                window.alert("Autocomplete's returned place contains no geometry");
+                return;
+            }
 
-        var infoWindow = new google.maps.InfoWindow({ map: map });
+            if (place.geometry.viewport) {
+                map.fitBounds(place.geometry.viewport);
+            } else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(17); // Why 17? Because it looks good.
+            }
+        });
+
         var map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
 
@@ -108,15 +103,25 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
         var barMarkers = [];
         var barsVisible = false;
 
+        var loungeLocations = [];
+        var loungeMarkers = [];
+        var loungesVisible = false;
+
 
 
         function showClubs() {
             clubLocations.forEach(function(club) {
+                var icon;
+                if (club.popularity === '1') { icon = './images/club.png'; }
+                if (club.popularity === '2') icon = './images/club.gif';
+                if (club.popularity === '3') icon = './images/club2.gif';
                 drawClubs({
                     lat: club.geometry.location.lat,
                     lng: club.geometry.location.lng
                 }, {
-                    icon: './images/clubmarker.png'
+                    icon: icon,
+                    optimized: false,
+                    data: club
                 })
             })
             clubsVisible = true;
@@ -124,15 +129,38 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
 
         function showBars() {
             barLocations.forEach(function(bar) {
+                var icon;
+                if (bar.popularity === '1') { icon = './images/bar.png'; }
+                if (bar.popularity === '2') icon = './images/bar.gif';
+                if (bar.popularity === '3') icon = './images/bar2.gif';
                 drawBars({
                     lat: bar.geometry.location.lat,
                     lng: bar.geometry.location.lng
                 }, {
-                    icon: './images/barmarker.png',
+                    icon: icon,
+                    optimized: false,
                     data: bar
                 })
             })
             barsVisible = true;
+        }
+
+        function showLounges() {
+            loungeLocations.forEach(function(lounge) {
+                var icon;
+                if (lounge.popularity === '1') { icon = './images/lounge.png'; }
+                if (lounge.popularity === '2') icon = './images/lounge.gif';
+                if (lounge.popularity === '3') icon = './images/lounge2.gif';
+                drawLounges({
+                    lat: lounge.geometry.location.lat,
+                    lng: lounge.geometry.location.lng
+                }, {
+                    icon: icon,
+                    optimized: false,
+                    data: lounge
+                })
+            })
+            loungesVisible = true;
         }
 
         function hideClubs() {
@@ -147,6 +175,13 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
                 index.setMap(null);
             })
             barsVisible = false;
+        }
+
+        function hideLounges() {
+            loungeMarkers.forEach(function(index) {
+                index.setMap(null);
+            })
+            loungesVisible = false;
         }
 
 
@@ -167,6 +202,14 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
             }
         })
 
+        $('#loungeButton').on('click', function() {
+            if (loungesVisible) {
+                hideLounges();
+            } else {
+                showLounges();
+            }
+        })
+
 
         function drawClubs(location, opts) {
             if (typeof opts !== 'object') {
@@ -175,8 +218,9 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
             opts.position = new google.maps.LatLng(location.lat, location.lng);
             opts.map = map;
             opts.animation = google.maps.Animation.DROP;
-            opts.mydata = 'random string';
+            opts.mydata = opts.data;
             var marker = new google.maps.Marker(opts);
+            marker.addListener('click', openInfo);
             clubMarkers.push(marker);
         }
 
@@ -189,7 +233,7 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
             opts.animation = google.maps.Animation.DROP;
             opts.mydata = opts.data;
             var marker = new google.maps.Marker(opts);
-            marker.addListener('click', openInfoBar);
+            marker.addListener('click', openInfo);
             // marker.addListener('click',toggleBounce);
 
             barMarkers.push(marker);
@@ -202,7 +246,21 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
             //     }
             // }
         }
-        var openInfoBar = function() {
+
+        function drawLounges(location, opts) {
+            if (typeof opts !== 'object') {
+                opts = {};
+            }
+            opts.position = new google.maps.LatLng(location.lat, location.lng);
+            opts.map = map;
+            opts.animation = google.maps.Animation.DROP;
+            opts.mydata = opts.data;
+            var marker = new google.maps.Marker(opts);
+            marker.addListener('click', openInfo);
+            loungeMarkers.push(marker);
+        }
+
+        var openInfo = function() {
             $scope.toggleLeft(this);
         }
 
@@ -211,21 +269,38 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
         map.setMapTypeId('map_style');
         // }
 
+        var refclubs = new Firebase("https://stackathon.firebaseio.com/clubs");
+        var refbars = new Firebase("https://stackathon.firebaseio.com/bars");
+        var reflounges = new Firebase("https://stackathon.firebaseio.com/lounges");
 
+        var dataClubs = $firebaseArray(refclubs);
+        var dataBars = $firebaseArray(refbars);
+        var dataLounges = $firebaseArray(reflounges);
 
-        $.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7050758,-74.0113544&radius=10000&type=night_club&key=AIzaSyD7fSCbORa-dWRvAlUvAsd4-KrE_-ujCRA', function(data) {
-            data.results.forEach(function(club) {
-                clubLocations.push(club.geometry.location);
+        // $.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7050758,-74.0113544&radius=10000&type=night_club&key=AIzaSyD7fSCbORa-dWRvAlUvAsd4-KrE_-ujCRA', function(data) {
+        dataClubs.$loaded()
+            .then(function(clubs) {
+                clubs.forEach(function(club) {
+                    clubLocations.push(club);
+                })
             })
-        });
 
-        $.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7050758,-74.0113544&radius=10000&type=bar&key=AIzaSyD7fSCbORa-dWRvAlUvAsd4-KrE_-ujCRA', function(data) {
-            data.results.forEach(function(bar) {
-                // console.log(bar)
-                // barLocations.push(bar.geometry.location);
-                barLocations.push(bar);
+
+        // $.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7050758,-74.0113544&radius=10000&type=bar&key=AIzaSyD7fSCbORa-dWRvAlUvAsd4-KrE_-ujCRA', function(data) {
+        dataBars.$loaded()
+            .then(function(bars) {
+                bars.forEach(function(bar) {
+                    barLocations.push(bar);
+                })
             })
-        });
+
+        // $.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7050758,-74.0113544&radius=10000&type=restaurant&key=AIzaSyD7fSCbORa-dWRvAlUvAsd4-KrE_-ujCRA', function(data) {
+        dataLounges.$loaded()
+            .then(function(lounges) {
+                lounges.forEach(function(lounge) {
+                    loungeLocations.push(lounge);
+                })
+            })
 
 
         $(document).ready(function() {

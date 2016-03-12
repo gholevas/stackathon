@@ -2,7 +2,7 @@
 <html ng-app="stackathon" lang="en">
 
 <head>
-    <title>Dragoman. Your trip, booked.</title>
+    <title>Flock. Your night, planned.</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
@@ -22,7 +22,7 @@
     <div id="Home" class="w-section full-vh-section">
         <div id='map-canvas'></div>
         <md-sidenav id="leftStuff" style="background-color:#f39022;" ng-cloak class="ng-cloak md-sidenav-left md-whiteframe-4dp" md-component-id="left">
-            <md-toolbar style="background-color:#311b92;" class="md-theme-light">
+            <md-toolbar style="background-color:black;" class="md-theme-light">
                 <h1 layout-align="center" class="md-toolbar-tools" style="color: white;text-align: center;">{{name}}</h1>
             </md-toolbar>
             <md-content layout-align="center" style="background-color:#f39022;" ng-controller="LeftCtrl" layout-padding="">
@@ -61,33 +61,32 @@
     </md-content>
     </md-sidenav>
     </div>
-    <div id="spinner" data-delay="1000" class="w-dropdown bubble-out-menu">
+    <div id="spinner" style="background-color:#7e57c2;" data-delay="1000" class="w-dropdown bubble-out-menu">
         <div class="w-dropdown-toggle bubble-out-toggle">
             <div data-ix="menu-button" class="bubble-out-title" style="font-size:100px;">+</div>
             <div data-ix="on-load-display-none" class="close" style="font-size:40px;">X</div>
         </div>
         <nav class="w-dropdown-list bubble-out-list">
-            <a href="#" id="clubButton" data-ix="bubble-out-top-right-4" class="w-dropdown-link link-1"><span><img src="./images/activity.png"/></span></a>
-            <a href="#" id="barButton" data-ix="bubble-out-top-right-3" class="w-dropdown-link link-1 _2"><span><img src="./images/food.png"/></span></a>
-            <a href="#" id="activityButton" data-ix="bubble-out-top-right-2" class="w-dropdown-link link-1 _3"><span><img src="./images/activity.png"/></span></a>
+            <a href="#" id="clubButton" data-ix="bubble-out-top-right-4" class="w-dropdown-link link-1"><span><img src="./images/clublabel.png"/></span></a>
+            <a href="#" id="barButton" data-ix="bubble-out-top-right-3" class="w-dropdown-link link-1 _2"><span><img src="./images/barlabel.png"/></span></a>
+            <a href="#" id="loungeButton" data-ix="bubble-out-top-right-2" class="w-dropdown-link link-1 _3"><span><img src="./images/loungelabel.png"/></span></a>
             <!--             <a href="index.html#Extra" data-ix="bubble-out-top-right" class="w-dropdown-link link-1 _4"><span><img src="./images/saved.png"/></span></a> -->
         </nav>
     </div>
     <div id="fsModal" class="modal modal-fullscreen">
         <div class="modal-dialog">
-            <h2 style="text-align:center;color:#f39022;">Dragoman
+            <h2 style="text-align:center;color:#f39022;">Flock
         </h2>
             <div class="centered">
                 <img style="width:20vh;left:50%;" src="images/logo.png" /></div>
             <hr style="padding:0;">
             <div class="centered">
-                <h3>Select the location and duration of your trip.</h3>
-                <input placeholder="Country,city,etc.." style="margin-right:50px;"></input>
-                <input type="number" placeholder="5 days">
+                <h3>Where are you going out tonight?</h3>
+                <input id="locationInput" placeholder="Country,city,etc.." style="width:500px;height:50px;color:black;"></input>
                 <br>
                 <br>
                 <button id="startTrip" class="btn btn-lg btn-primary">
-                    Plan Trip
+                    Let's go!
                 </button>
                 <div>
                 </div>
@@ -96,7 +95,9 @@
 <footer>
     <script src='https://code.jquery.com/jquery-2.2.1.min.js'></script>
     <script type="text/javascript" src="https://daks2k3a4ib2z.cloudfront.net/556a8456d607254261e9db33/js/webflow.d525243f4.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIfjYpqd9yztVKkqOo30gS710JbF6DTYo&sensor=true"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIfjYpqd9yztVKkqOo30gS710JbF6DTYo&libraries=places"></script>
+
+
     <!-- Angular Material requires Angular.js Libraries -->
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
@@ -105,6 +106,10 @@
     <!-- Angular Material Library -->
     <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
     <script src="https://cdn.jsdelivr.net/g/angular.bootstrap@1.2.2(ui-bootstrap.min.js+ui-bootstrap-tpls.min.js)"></script>
+    <!-- Firebase -->
+    <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+    <!-- AngularFire -->
+    <script src="https://cdn.firebase.com/libs/angularfire/1.1.4/angularfire.min.js"></script>
     <script src="js/index.js"></script>
 </footer>
 
