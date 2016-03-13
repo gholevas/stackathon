@@ -4,6 +4,7 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
         $scope.toggleLeft = function(info) {
             $scope.name = info.data.name;
             $scope.address = info.data.vicinity;
+            getPics(info.data.igid)
             $mdSidenav('left').toggle()
         }
 
@@ -15,18 +16,20 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
         $scope.slides = [];
         var currIndex = 0;
 
-
-
-        $http.jsonp('https://api.instagram.com/v1/locations/436022/media/recent?access_token=455318476.fdade96.174d9ee056fc47c2a1958cf177596b27&callback=JSON_CALLBACK')
-            .success(function(res) {
-                res.data.forEach(function(pic) {
-                    $scope.slides.push({
-                        image: pic.images.standard_resolution.url,
-                        text: pic.caption.text,
-                        id: currIndex++
+        var getPics = function(igId){
+            $http.jsonp('https://api.instagram.com/v1/locations/'+igId+'/media/recent?access_token=455318476.fdade96.174d9ee056fc47c2a1958cf177596b27&callback=JSON_CALLBACK')
+                .success(function(res) {
+                    $scope.slides = [];
+                    currIndex = 0;
+                    res.data.forEach(function(pic) {
+                        $scope.slides.push({
+                            image: pic.images.standard_resolution.url,
+                            text: pic.caption.text,
+                            id: currIndex++
+                        })
                     })
                 })
-            })
+        }
 
 
 
