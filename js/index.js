@@ -12,26 +12,90 @@ stackathon.controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $h
             return $mdSidenav('left').isOpen();
         };
 
+        function mode(array) {
+            if (array.length == 0)
+                return null;
+            var modeMap = {};
+            var maxEl = array[0],
+                maxCount = 1;
+            for (var i = 0; i < array.length; i++) {
+                var el = array[i];
+                if (modeMap[el] == null)
+                    modeMap[el] = 1;
+                else
+                    modeMap[el]++;
+                if (modeMap[el] > maxCount) {
+                    maxEl = el;
+                    maxCount = modeMap[el];
+                }
+            }
+            return maxEl;
+        }
+
+
         $scope.active = 0;
         $scope.slides = [];
-        var currIndex = 0;
+        $scope.femalePercent = 'Calculating';
+        $scope.malePercent = 'Calculating';
+        $scope.ageRange = 'Calculating';
 
-        var getPics = function(igId){
-            $http.jsonp('https://api.instagram.com/v1/locations/'+igId+'/media/recent?access_token=455318476.fdade96.174d9ee056fc47c2a1958cf177596b27&callback=JSON_CALLBACK')
+        var currIndex = 0;
+        var averageAge = [];
+        var numMales = 0;
+        var numFemales = 0;
+        var totalHumans = 0;
+        var myPromises = [];
+        var aurl;
+        var getPics = function(igId) {
+            $http.jsonp('https://api.instagram.com/v1/locations/' + igId + '/media/recent?access_token=455318476.fdade96.174d9ee056fc47c2a1958cf177596b27&callback=JSON_CALLBACK')
                 .success(function(res) {
                     $scope.slides = [];
                     currIndex = 0;
+                    averageAge = [];
+                    numMales = 0;
+                    numFemales = 0;
+                    $scope.femalePercent = 'Calculating';
+                    $scope.malePercent = 'Calculating';
+                    $scope.ageRange = 'Calculating';
+
+                    myPromises = [];
+
                     res.data.forEach(function(pic) {
+                        aurl = 'http://gateway-a.watsonplatform.net/calls/url/URLGetRankedImageFaceTags?url=' + pic.images.standard_resolution.url + '&apikey=7989f6f96f1bde76e255883a843ace8e27e0fb12&outputMode=json';
+                        myPromises.push($http.get(aurl))
+
                         $scope.slides.push({
                             image: pic.images.standard_resolution.url,
                             text: pic.caption.text,
                             id: currIndex++
                         })
                     })
+
+                    Promise.all(myPromises)
+                        .then(function(values) {
+                            values.forEach(function(res,index) {
+                                // if(res.data.imageFaces.length === 0)console.log('index is',index)
+                                if (Array.isArray(res.data.imageFaces)) {
+                                    res.data.imageFaces.forEach(function(image) {
+                                        if (image.gender.gender === 'MALE') numMales++;
+                                        if (image.gender.gender === 'FEMALE') numFemales++;
+                                        averageAge.push(image.age.ageRange)
+                                    })
+                                } else {
+                                    averageAge.push(res.data.imageFaces.ageRange);
+                                    if (res.data.imageFaces.gender.gender === 'MALE') numMales++;
+                                    if (res.data.imageFaces.gender.gender === 'FEMALE') numFemales++;
+                                }
+                            })
+                            $scope.femalePercent = (numFemales / (numFemales + numMales)) * 100;
+                            $scope.malePercent = 100 - $scope.femalePercent;
+                            $scope.ageRange = mode(averageAge)
+                        })
+                        .then(null, function(err) {
+                            console.log(err)
+                        })
                 })
         }
-
-
 
 
 
